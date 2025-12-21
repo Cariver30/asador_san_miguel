@@ -25,6 +25,7 @@ use App\Http\Controllers\HomeController;
 Route::get('/', [HomeController::class, 'cover'])->name('cover');
 Route::get('/menu', [MenuController::class, 'index']);
 Route::get('/cocktails', [CocktailController::class, 'index'])->name('cocktails.index');
+Route::get('/wines', [WineController::class, 'index'])->name('wines.index');
 Route::get('/reservations', function () {
     return redirect()->away('https://asador-1293f.web.app/');
 })->name('reservations.app');
@@ -88,7 +89,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/wine-categories/reorder', [WineCategoryController::class, 'reorder'])->name('wine-categories.reorder');
 
     Route::resource('wine-categories', WineCategoryController::class);
-    Route::resource('wines', WineController::class);
+    Route::resource('wines', WineController::class)->except(['index']);
     Route::resource('wine-types', WineTypeController::class);
     Route::resource('regions', App\Http\Controllers\RegionController::class);
     Route::resource('food-pairings', FoodPairingController::class);
