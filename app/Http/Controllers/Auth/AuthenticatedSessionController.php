@@ -20,7 +20,7 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
         $request->session()->regenerate();
 
-        return Redirect::intended('dashboard');
+        return Redirect::intended(route('admin.new-panel', absolute: false));
     }
 
     public function destroy(Request $request)

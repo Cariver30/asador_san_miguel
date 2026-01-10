@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
+    public function index()
+    {
+        return redirect()->route('cover');
+    }
+
     public function cover()
     {
         $settings = Setting::first();

@@ -46,7 +46,13 @@ Route::prefix('experiencias')->name('experiences.')->group(function () {
     Route::post('/{event:slug}/notify', [EventNotificationController::class, 'subscribe'])->name('notify');
 });
 
+Route::redirect('/dashboard', '/')->name('dashboard');
+
 Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
     Route::get('/admin/panel', [AdminController::class, 'panel'])->name('admin.panel');
     Route::get('/admin', [AdminController::class, 'panel'])->name('admin');
     Route::get('/admin/categories', [CategoryController::class, 'showCategories'])->name('admin.categories');
@@ -103,15 +109,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin.popups/{popup}', [AdminController::class, 'destroyPopup'])->name('admin.popups.destroy');
     Route::patch('/admin/popups/{popup}/toggle-visibility', [AdminController::class, 'toggleVisibility'])->name('admin.popups.toggleVisibility');
 });
-
-// Rutas protegidas para usuarios autenticados sin middleware
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');
-
-Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 // Rutas de autenticación
 require __DIR__.'/auth.php';

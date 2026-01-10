@@ -21,22 +21,8 @@
 
         body {
             font-family: {{ $settings->font_family_menu ?? 'ui-sans-serif' }};
-            @if($settings && $settings->background_image_menu)
-                background: url('{{ asset('storage/' . $settings->background_image_menu) }}') no-repeat center center fixed;
-            @else
-                background: radial-gradient(circle at top, #f3eada, #d9c7a1);
-            @endif
-            background-size: cover;
-            background-attachment: fixed;
+            background-color: #000;
             position: relative;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.45);
-            z-index: -1;
         }
 
         .content-layer {
@@ -71,15 +57,33 @@
             transform: translateY(0);
         }
 
-        @media (max-width: 768px) {
-            body {
-                background-position: center top;
-                background-attachment: fixed;
-            }
+        .menu-background {
+            position: fixed;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -2;
+            will-change: transform;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: -1;
+            pointer-events: none;
         }
     </style>
 </head>
 <body class="text-white bg-black/70">
+@php
+    $menuBackgroundStyle = $settings && $settings->background_image_menu
+        ? "background-image: url('" . asset('storage/' . $settings->background_image_menu) . "');"
+        : "background-image: radial-gradient(circle at top, #f3eada, #d9c7a1);";
+@endphp
+<div class="menu-background" style="{{ $menuBackgroundStyle }}" aria-hidden="true"></div>
+<div class="menu-overlay" aria-hidden="true"></div>
 
 <!-- LOGO + BOTÓN MENU -->
 <div class="text-center py-6 relative content-layer">
@@ -134,7 +138,16 @@
 
 <!-- CONTENIDO DE CATEGORÍAS Y PLATOS -->
 <div class="max-w-5xl mx-auto px-4 pb-32 content-layer">
+    @php $chefAnchorInserted = false; @endphp
     @foreach ($categories as $category)
+        @php
+            $categoryName = strtolower($category->name);
+            $isChefCategory = str_contains($categoryName, 'chef') || str_contains($categoryName, 'especial');
+        @endphp
+        @if ($isChefCategory && ! $chefAnchorInserted)
+            <span id="chef-special" class="sr-only"></span>
+            @php $chefAnchorInserted = true; @endphp
+        @endif
         <section id="category{{ $category->id }}" class="mb-10 category-section" data-category-id="category{{ $category->id }}">
             <h2 class="text-3xl font-bold text-center mb-6"
                 style="background-color: {{ $settings->category_name_bg_color_menu ?? 'rgba(254, 90, 90, 0.8)' }};

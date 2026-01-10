@@ -20,3 +20,4 @@ yarn-error.log
 asador san miguel.zip
 asador san miguel/
 database/seeders/AdminUserSeeder.php
+.DS_Store
