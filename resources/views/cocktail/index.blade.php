@@ -18,22 +18,31 @@
             font-family: {{ $settings->font_family_cocktails ?? '\'Inter\', sans-serif' }};
             min-height: 100vh;
             margin: 0;
+            position: relative;
+            background: #0b0a13;
+        }
+        .cocktail-background {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
             @if($settings && $settings->background_image_cocktails)
-                background: url('{{ asset('storage/' . $settings->background_image_cocktails) }}') no-repeat center center fixed;
+                background: url('{{ asset('storage/' . $settings->background_image_cocktails) }}') no-repeat center center;
             @else
                 background: radial-gradient(circle at top, #1f1b2e, #0b0a13);
             @endif
             background-size: cover;
         }
-        @if(!empty($settings->overlay_color_cocktails))
-        body::before {
-            content: '';
+        .cocktail-overlay {
             position: fixed;
             inset: 0;
-            background: {{ $settings->overlay_color_cocktails }};
-            z-index: 0;
+            z-index: -1;
+            pointer-events: none;
+            @if(!empty($settings->overlay_color_cocktails))
+                background: {{ $settings->overlay_color_cocktails }};
+            @else
+                background: rgba(0, 0, 0, 0.25);
+            @endif
         }
-        @endif
         .content-layer {
             position: relative;
             z-index: 1;
@@ -41,6 +50,8 @@
     </style>
 </head>
 <body class="text-white content-layer">
+    <div class="cocktail-background" aria-hidden="true"></div>
+    <div class="cocktail-overlay" aria-hidden="true"></div>
     <header class="max-w-6xl mx-auto px-4 pt-10 flex flex-col items-center gap-6">
         <img src="{{ asset('storage/' . ($settings->logo ?? 'default-logo.png')) }}" alt="Logo" class="w-40 md:w-56 object-contain">
         <div class="text-center space-y-2">

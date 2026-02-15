@@ -13,14 +13,34 @@
     <style>
         body {
             font-family: {{ $settings->font_family_wines ?? 'ui-sans-serif' }};
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+            background: #0b0a13;
+        }
+        .wine-background {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
             @if($settings && $settings->background_image_wines)
-                background: url('{{ asset("storage/" . $settings->background_image_wines) }}') no-repeat center center fixed;
+                background: url('{{ asset("storage/" . $settings->background_image_wines) }}') no-repeat center center;
+            @else
+                background: radial-gradient(circle at top, #1f1b2e, #0b0a13);
             @endif
             background-size: cover;
+        }
+        .wine-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.25);
         }
     </style>
 </head>
 <body class="text-white">
+    <div class="wine-background" aria-hidden="true"></div>
+    <div class="wine-overlay" aria-hidden="true"></div>
 
     <!-- LOGO -->
     <div class="text-center py-6">
