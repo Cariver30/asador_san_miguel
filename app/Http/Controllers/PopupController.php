@@ -29,9 +29,14 @@ class PopupController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date',
             'active' => 'required|boolean',
+            'repeat_days' => 'nullable|array',
+            'repeat_days.*' => 'integer|between:0,6',
         ]);
 
         $data = $request->all();
+        $data['repeat_days'] = is_array($request->input('repeat_days'))
+            ? implode(',', $request->input('repeat_days'))
+            : null;
         
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('popups', 'public');
@@ -56,9 +61,14 @@ class PopupController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date',
             'active' => 'required|boolean',
+            'repeat_days' => 'nullable|array',
+            'repeat_days.*' => 'integer|between:0,6',
         ]);
 
         $data = $request->all();
+        $data['repeat_days'] = is_array($request->input('repeat_days'))
+            ? implode(',', $request->input('repeat_days'))
+            : null;
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('popups', 'public');

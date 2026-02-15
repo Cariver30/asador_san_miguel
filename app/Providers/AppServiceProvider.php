@@ -15,12 +15,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if (Schema::hasTable('settings')) {
-            View::composer('*', function ($view) {
-                if (!View::shared('settings')) {
-                    $view->with('settings', Setting::first());
-                }
-            });
+        if (app()->runningInConsole()) {
+            return;
+        }
+
+        try {
+            if (Schema::hasTable('settings')) {
+                View::composer('*', function ($view) {
+                    if (!View::shared('settings')) {
+                        $view->with('settings', Setting::first());
+                    }
+                });
+            }
+        } catch (\Throwable $e) {
+            // Evita que el arranque falle si la BD no está disponible.
         }
     }
 

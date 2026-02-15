@@ -163,6 +163,7 @@
                         class="dish-card rounded-lg p-4 shadow-lg relative flex items-center cursor-pointer hover:scale-105 transition"
                         style="background-color: {{ $settings->card_bg_color_menu ?? '#191919' }};
                                opacity: {{ $settings->card_opacity_menu ?? 0.9 }};"
+                        data-dish-id="{{ $dish->id }}"
                         data-name="{{ $dish->name }}"
                         data-description="{{ $dish->description }}"
                         data-price="${{ number_format($dish->price, 2) }}"
@@ -318,6 +319,15 @@
             sectionObserver.observe(section);
         });
 
+        const dishParam = new URLSearchParams(window.location.search).get('dish');
+        if (dishParam) {
+            const dishCard = document.querySelector(`.dish-card[data-dish-id="${dishParam}"]`);
+            if (dishCard) {
+                dishCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                openDishModal(dishCard);
+            }
+        }
+
         // Animar tarjetas al aparecer
         const cardObserver = new IntersectionObserver(entries => {
             entries.forEach(entry => {
@@ -329,6 +339,61 @@
         }, { threshold: 0.2 });
 
         document.querySelectorAll('.dish-card').forEach(card => cardObserver.observe(card));
+
+        // 🔁 Pop-ups (si tienes alguno activo)
+        const popups = @json($popups ?? []);
+        const popupList = Array.isArray(popups) ? popups : [];
+        const now = new Date();
+        const currentDay = now.getDay();
+
+        const parseDate = (dateStr, endOfDay = false) => {
+            if (!dateStr) return null;
+            const dateOnly = String(dateStr).trim().split('T')[0].split(' ')[0];
+            const parts = dateOnly.split('-').map(Number);
+            if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+            const [year, month, day] = parts;
+            return new Date(
+                year,
+                month - 1,
+                day,
+                endOfDay ? 23 : 0,
+                endOfDay ? 59 : 0,
+                endOfDay ? 59 : 0,
+                endOfDay ? 999 : 0
+            );
+        };
+
+        const showPopup = (imageUrl) => {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4';
+            modal.innerHTML = `
+                <div class="bg-white text-slate-900 rounded-3xl p-4 max-w-xl w-full shadow-2xl relative">
+                    <button class="absolute top-3 right-3 text-slate-500 hover:text-slate-800 text-2xl leading-none" aria-label="Cerrar">&times;</button>
+                    <img src="${imageUrl}" class="w-full h-auto rounded-2xl" alt="Pop-up">
+                </div>
+            `;
+            const closeBtn = modal.querySelector('button');
+            closeBtn?.addEventListener('click', () => modal.remove());
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+            document.body.appendChild(modal);
+        };
+
+        popupList.forEach(popup => {
+            const start = parseDate(popup.start_date);
+            const end = parseDate(popup.end_date, true);
+            if (!start || !end) return;
+            const repeatDays = popup.repeat_days
+                ? popup.repeat_days.split(',').map(Number).filter(Number.isInteger)
+                : [];
+
+            if (popup.active && now >= start && now <= end &&
+                popup.view === 'menu' &&
+                (repeatDays.length === 0 || repeatDays.includes(currentDay))) {
+                showPopup(`{{ asset('storage') }}/${popup.image}`);
+            }
+        });
     });
 
     // Función para abrir modal con datos del plato

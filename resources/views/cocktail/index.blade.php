@@ -298,14 +298,35 @@
                 });
             });
 
-            const popups = @json($popups);
+            const popups = @json($popups ?? []);
+            const popupList = Array.isArray(popups) ? popups : [];
             const now = new Date();
             const today = now.getDay();
 
-            popups.forEach(popup => {
-                const start = new Date(popup.start_date);
-                const end = new Date(popup.end_date);
-                const repeatDays = popup.repeat_days ? popup.repeat_days.split(',').map(Number) : [];
+            const parseDate = (dateStr, endOfDay = false) => {
+                if (!dateStr) return null;
+                const dateOnly = String(dateStr).trim().split('T')[0].split(' ')[0];
+                const parts = dateOnly.split('-').map(Number);
+                if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+                const [year, month, day] = parts;
+                return new Date(
+                    year,
+                    month - 1,
+                    day,
+                    endOfDay ? 23 : 0,
+                    endOfDay ? 59 : 0,
+                    endOfDay ? 59 : 0,
+                    endOfDay ? 999 : 0
+                );
+            };
+
+            popupList.forEach(popup => {
+                const start = parseDate(popup.start_date);
+                const end = parseDate(popup.end_date, true);
+                if (!start || !end) return;
+                const repeatDays = popup.repeat_days
+                    ? popup.repeat_days.split(',').map(Number).filter(Number.isInteger)
+                    : [];
                 if (
                     popup.active &&
                     popup.view === 'cocktails' &&
